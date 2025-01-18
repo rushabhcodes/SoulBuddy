@@ -1,13 +1,14 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { Star } from 'lucide-react'
+import { redirect } from "next/navigation";
+
 
 export default function Hero() {
-  const scrollToFeatures = () => {
-    const featuresSection = document.getElementById('features');
-    featuresSection?.scrollIntoView({ behavior: 'smooth' });
-  };
+
+  const handleButtonClick = () => {
+    redirect('/dashboard');
+  }
 
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 text-center">
@@ -21,7 +22,7 @@ export default function Hero() {
         <Button 
           size="lg" 
           className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105"
-          onClick={scrollToFeatures}
+          onClick={handleButtonClick}
         >
           Start Your Journey
         </Button>
@@ -35,4 +36,3 @@ export default function Hero() {
     </section>
   )
 }
-
