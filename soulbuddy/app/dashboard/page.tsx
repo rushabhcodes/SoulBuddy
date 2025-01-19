@@ -1,7 +1,9 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from 'next/navigation';
 
 const DashboardPage = () => {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [insightResult, setInsightResult] = useState(null);
   const [formVisible, setFormVisible] = useState(true);
@@ -78,7 +80,7 @@ const DashboardPage = () => {
   };
 
   const handleChatRedirect = () => {
-    redirect("dashboard/chat");
+    router.push('/dashboard/chat');
   };
 
   const renderInsightResult = (result) => {
@@ -216,95 +218,151 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      {loading && <p className="text-center text-lg">Loading...</p>}
-      {formVisible && (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-            />
+    <div className="min-h-screen bg-[#0A1828] text-white">
+      <div className="container mx-auto p-8 max-w-4xl">
+        {loading && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-400"></div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Date of Birth
-            </label>
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-            />
+        )}
+        
+        {formVisible && (
+          <div className="bg-[#1A2937] rounded-2xl shadow-xl p-8 mb-8 border border-gray-700">
+            <h1 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-purple-400 to-indigo-400 text-transparent bg-clip-text">
+              Your Astrological Journey Begins Here
+            </h1>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="w-full p-3 bg-[#0A1828] border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 text-white placeholder-gray-500"
+                      placeholder="Enter your name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      Date of Birth
+                    </label>
+                    <input
+                      type="date"
+                      name="dateOfBirth"
+                      value={formData.dateOfBirth}
+                      onChange={handleChange}
+                      className="w-full p-3 bg-[#0A1828] border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      Time of Birth
+                    </label>
+                    <input
+                      type="time"
+                      name="timeOfBirth"
+                      value={formData.timeOfBirth}
+                      onChange={handleChange}
+                      className="w-full p-3 bg-[#0A1828] border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 text-white"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      Gender
+                    </label>
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      className="w-full p-3 bg-[#0A1828] border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 text-white"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      State
+                    </label>
+                    <input
+                      type="text"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleChange}
+                      className="w-full p-3 bg-[#0A1828] border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 text-white placeholder-gray-500"
+                      placeholder="Enter your state"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleChange}
+                      className="w-full p-3 bg-[#0A1828] border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 text-white placeholder-gray-500"
+                      placeholder="Enter your city"
+                    />
+                  </div>
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="w-full py-3 px-6 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-lg shadow-md hover:shadow-purple-500/20 transform hover:scale-[1.02] transition-all duration-200"
+              >
+                Generate Your Astrological Insights
+              </button>
+            </form>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Time of Birth
-            </label>
-            <input
-              type="time"
-              name="timeOfBirth"
-              value={formData.timeOfBirth}
-              onChange={handleChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Gender
-            </label>
-            <select
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+        )}
+
+        {insightResult && (
+          <div className="bg-[#1A2937] rounded-2xl shadow-xl p-8 animate-fade-in border border-gray-700">
+            {renderInsightResult(insightResult)}
+            <button
+              onClick={() => setFormVisible(true)}
+              className="mt-6 w-full py-3 px-6 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-lg shadow-md hover:shadow-purple-500/20 transform hover:scale-[1.02] transition-all duration-200"
             >
-              <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
+              Generate New Reading
+            </button>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              State
-            </label>
-            <input
-              type="text"
-              name="state"
-              value={formData.state}
-              onChange={handleChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-            />
+        )}
+
+        {/* Floating chat button with updated styling */}
+        <button
+          onClick={handleChatRedirect}
+          className="fixed bottom-8 right-8 p-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full shadow-lg hover:shadow-purple-500/20 transform hover:scale-105 transition-all duration-200 group"
+        >
+          <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-[#1A2937] text-white px-4 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap border border-gray-700">
+            Chat with AI Assistant
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              City
-            </label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-6 h-6"
           >
-            Submit
-          </button>
-        </form>
-      )}
-      {insightResult && renderInsightResult(insightResult)}
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 };
