@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import swisseph as swe
 import datetime
 
 app = Flask(__name__)
+CORS(app)
 
 # Function to calculate planetary positions and generate Kundali
 def generate_kundali(dob, time_of_birth, city, state):

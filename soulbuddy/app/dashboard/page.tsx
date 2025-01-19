@@ -1,168 +1,312 @@
-"use client"
+"use client";
+import React, { useState } from "react";
 
-import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-export default function ProtectedRoute() {
+const DashboardPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [insightResult, setInsightResult] = useState(null);
+  const [formVisible, setFormVisible] = useState(true);
   const [formData, setFormData] = useState({
-    name: '',
-    dateOfBirth: '',
-    timeOfBirth: '',
-    location: '',
-    gender: '',
-    state: ''
+    name: "",
+    dateOfBirth: "",
+    timeOfBirth: "",
+    gender: "",
+    state: "",
+    location: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'timeOfBirth') {
-      const timeValue = value.length === 5 ? value : value.padStart(5, '0');
-      setFormData({ ...formData, [name]: timeValue });
-    } else {
-      setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    const payload = {
+      name: formData.name,
+      dob: formData.dateOfBirth,
+      time_of_birth: formData.timeOfBirth,
+      gender: formData.gender,
+      state: formData.state,
+      city: formData.location,
+    };
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/generate_kundali", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Kundali generated:", result);
+
+        // Send the result to /api/getInsight
+        try {
+          const insightResponse = await fetch("/api/getInsight", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message: result }),
+          });
+
+          if (insightResponse.ok) {
+            const insightResult = await insightResponse.json();
+            setInsightResult(insightResult);
+            setFormVisible(false);
+          } else {
+            console.error("Failed to get insight");
+          }
+        } catch (insightError) {
+          console.error(
+            "Error sending result to /api/getInsight:",
+            insightError
+          );
+        }
+      } else {
+        console.error("Failed to generate kundali");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      timeOfBirth: value
-    }));
+  const handleChatRedirect = () => {
+    redirect("dashboard/chat");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form submitted with data:', formData);
-    // Add your submission logic here
+  const renderInsightResult = (result) => {
+    const data = JSON.parse(result.outputs[0].outputs[0].results.message.text);
+    return (
+      <div className="insight-result p-6 bg-gray-100 rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold mb-4">
+          Astrological Insights for {data.name}
+        </h2>
+        <div className="insight-section mb-4">
+          <h3 className="text-xl font-semibold mb-2">Career</h3>
+          <p>
+            <strong>Summary:</strong> {data.Career.Summary}
+          </p>
+          <p>
+            <strong>Opportunities:</strong>{" "}
+            {data.Career.Opportunities.join(", ")}
+          </p>
+          <p>
+            <strong>Challenges:</strong> {data.Career.Challenges.join(", ")}
+          </p>
+          <p>
+            <strong>Advice:</strong> {data.Career.Advice}
+          </p>
+        </div>
+        <div className="insight-section mb-4">
+          <h3 className="text-xl font-semibold mb-2">Relationships</h3>
+          <p>
+            <strong>Summary:</strong> {data.Relationships.Summary}
+          </p>
+          <div className="insight-subsection mb-2">
+            <h4 className="text-lg font-semibold mb-1">Romantic</h4>
+            <p>
+              <strong>Compatibility:</strong>{" "}
+              {data.Relationships.Romantic.Compatibility}
+            </p>
+            <p>
+              <strong>Challenges:</strong>{" "}
+              {data.Relationships.Romantic.Challenges.join(", ")}
+            </p>
+            <p>
+              <strong>Advice:</strong> {data.Relationships.Romantic.Advice}
+            </p>
+          </div>
+          <div className="insight-subsection mb-2">
+            <h4 className="text-lg font-semibold mb-1">Personal</h4>
+            <p>
+              <strong>Friendships:</strong>{" "}
+              {data.Relationships.Personal.Friendships.join(", ")}
+            </p>
+            <p>
+              <strong>Social Interactions:</strong>{" "}
+              {data.Relationships.Personal.SocialInteractions}
+            </p>
+            <p>
+              <strong>Advice:</strong> {data.Relationships.Personal.Advice}
+            </p>
+          </div>
+        </div>
+        <div className="insight-section mb-4">
+          <h3 className="text-xl font-semibold mb-2">Personal Growth</h3>
+          <p>
+            <strong>Areas for Improvement:</strong>{" "}
+            {data.PersonalGrowth.AreasForImprovement.join(", ")}
+          </p>
+          <p>
+            <strong>Spiritual Development:</strong>{" "}
+            {data.PersonalGrowth.SpiritualDevelopment}
+          </p>
+          <p>
+            <strong>Life Lessons:</strong>{" "}
+            {data.PersonalGrowth.LifeLessons.join(", ")}
+          </p>
+        </div>
+        <div className="insight-section mb-4">
+          <h3 className="text-xl font-semibold mb-2">Family</h3>
+          <p>
+            <strong>Dynamics:</strong> {data.Family.Dynamics}
+          </p>
+          <p>
+            <strong>Support:</strong> {data.Family.Support}
+          </p>
+          <p>
+            <strong>Challenges:</strong> {data.Family.Challenges.join(", ")}
+          </p>
+        </div>
+        <div className="insight-section mb-4">
+          <h3 className="text-xl font-semibold mb-2">Social Connections</h3>
+          <p>
+            <strong>Overview:</strong> {data.SocialConnections.Overview}
+          </p>
+          <p>
+            <strong>Opportunities:</strong>{" "}
+            {data.SocialConnections.Opportunities.join(", ")}
+          </p>
+          <p>
+            <strong>Challenges:</strong>{" "}
+            {data.SocialConnections.Challenges.join(", ")}
+          </p>
+          <p>
+            <strong>Advice:</strong> {data.SocialConnections.Advice}
+          </p>
+        </div>
+        <div className="insight-section mb-4">
+          <h3 className="text-xl font-semibold mb-2">Daily Horoscope</h3>
+          <p>
+            <strong>Summary:</strong> {data.DailyHoroscope.Summary}
+          </p>
+          <p>
+            <strong>Advice:</strong> {data.DailyHoroscope.Advice}
+          </p>
+          <p>
+            <strong>Transits:</strong> {data.DailyHoroscope.Transits.join(", ")}
+          </p>
+        </div>
+        <div className="insight-section mb-4">
+          <h3 className="text-xl font-semibold mb-2">Monthly Horoscope</h3>
+          <p>
+            <strong>Summary:</strong> {data.MonthlyHoroscope.Summary}
+          </p>
+          <p>
+            <strong>Opportunities:</strong>{" "}
+            {data.MonthlyHoroscope.Opportunities.join(", ")}
+          </p>
+          <p>
+            <strong>Challenges:</strong>{" "}
+            {data.MonthlyHoroscope.Challenges.join(", ")}
+          </p>
+          <p>
+            <strong>Advice:</strong> {data.MonthlyHoroscope.Advice}
+          </p>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-950 via-purple-900 to-indigo-950 relative overflow-hidden">
-      {/* Decorative Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-32 w-96 h-96 rounded-full bg-purple-600/20 blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-32 w-96 h-96 rounded-full bg-indigo-600/20 blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/5 to-transparent"></div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="relative flex min-h-screen flex-col items-center p-4">
-        {/* Header Section */}
-        <div className="w-full max-w-4xl text-center mb-8 pt-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Your Cosmic Journey</h1>
-          <p className="text-purple-200 text-lg">Discover your celestial path by sharing your details</p>
-        </div>
-
-        {/* Form Section */}
-        <div className="bg-indigo-900/50 backdrop-blur-lg p-8 rounded-2xl max-w-md w-full shadow-2xl border border-purple-500/20">
-          <h2 className="text-2xl font-bold mb-6 text-white text-center">Enter Your Details</h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-white">Name</Label>
-              <Input 
-                id="name" 
-                name="name" 
-                value={formData.name} 
-                onChange={handleChange} 
-                required 
-                className="bg-indigo-800/50 text-white border-indigo-600/50 focus:border-purple-400 backdrop-blur-sm"
-                placeholder="Enter your name"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="dateOfBirth" className="text-white">Date of Birth</Label>
-              <Input 
-                id="dateOfBirth" 
-                name="dateOfBirth" 
-                type="date" 
-                value={formData.dateOfBirth} 
-                onChange={handleChange} 
-                required 
-                className="bg-indigo-800/50 text-white border-indigo-600/50 focus:border-purple-400 backdrop-blur-sm"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="timeOfBirth" className="text-white">Time of Birth</Label>
-              <Input 
-                id="timeOfBirth" 
-                name="timeOfBirth" 
-                type="time" 
-                value={formData.timeOfBirth}
-                onChange={handleChange}
-                required 
-                className="bg-indigo-800/50 text-white border-indigo-600/50 focus:border-purple-400 backdrop-blur-sm [color-scheme:dark]"
-                placeholder="Select time"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="location" className="text-white">Location</Label>
-              <Input 
-                id="location" 
-                name="location" 
-                value={formData.location} 
-                onChange={handleChange} 
-                required 
-                className="bg-indigo-800/50 text-white border-indigo-600/50 focus:border-purple-400 backdrop-blur-sm"
-                placeholder="Enter your birth place"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="gender" className="text-white">Gender</Label>
-              <Select 
-                name="gender" 
-                onValueChange={(value) => setFormData({ ...formData, gender: value })}
-                required
-              >
-                <SelectTrigger className="bg-indigo-800/50 text-white border-indigo-600/50 focus:border-purple-400 backdrop-blur-sm">
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent className="bg-indigo-800 text-white">
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="state" className="text-white">State</Label>
-              <Input 
-                id="state" 
-                name="state" 
-                value={formData.state} 
-                onChange={handleChange} 
-                required 
-                className="bg-indigo-800/50 text-white border-indigo-600/50 focus:border-purple-400 backdrop-blur-sm"
-                placeholder="Enter your state"
-              />
-            </div>
-
-            <div className="pt-4">
-              <Button 
-                type="submit"
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-[1.02]"
-              >
-                Begin Your Journey
-              </Button>
-            </div>
-          </form>
-        </div>
-
-        {/* Footer Section */}
-        <div className="w-full max-w-4xl text-center mt-8 text-purple-200/60 text-sm">
-          <p>Your cosmic journey awaits. All information is kept confidential.</p>
-        </div>
-      </div>
+    <div className="container mx-auto p-4">
+      {loading && <p className="text-center text-lg">Loading...</p>}
+      {formVisible && (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Date of Birth
+            </label>
+            <input
+              type="date"
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Time of Birth
+            </label>
+            <input
+              type="time"
+              name="timeOfBirth"
+              value={formData.timeOfBirth}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Gender
+            </label>
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              State
+            </label>
+            <input
+              type="text"
+              name="state"
+              value={formData.state}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              City
+            </label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
+          >
+            Submit
+          </button>
+        </form>
+      )}
+      {insightResult && renderInsightResult(insightResult)}
     </div>
   );
-}
+};
+
+export default DashboardPage;

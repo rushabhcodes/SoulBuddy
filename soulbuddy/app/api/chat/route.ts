@@ -3,22 +3,21 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const { message } = await request.json();
-    console.log("message:", message);
-    const newMessage = JSON.stringify(message);
-    console.log("newMessage:", newMessage);
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 160000); // 1 minute timeout
 
-    const response = await fetch(process.env.LANGFLOW_API_URL!, {
+    const response = await fetch(process.env.LANGFLOW_CHAT_API_URL!, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.LANGFLOW_APPLICATION_TOKEN}`,
+        Authorization: `Bearer ${process.env.LANGFLOW_CHAT_APPLICATION_TOKEN}`,
       },
       body: JSON.stringify({
-        input_value: newMessage,
+        input_value: message,
         output_type: "chat",
         input_type: "chat",
+        stream: "false",
         tweaks: {
         },
       }),
